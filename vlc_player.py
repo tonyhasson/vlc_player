@@ -3,7 +3,6 @@ from mysql.connector import Error
 
 
 
-
 def create_server_connection(host_name, user_name, user_password,database_name):
     connection = None
     try:
@@ -77,8 +76,18 @@ import os
 #import pathlib
 from threading import Thread, Event
 import time
+import keyboard
 #import platform
 #import shelve
+
+
+
+##trying to add keybinding
+
+#root.bind('a',self.OnPause)
+#def pressed_a(event=None):
+#    print("pressed a")
+
 
 class ttkTimer(Thread):
     """a class serving same function as wxTimer... but there may be better ways to do this
@@ -105,16 +114,6 @@ class ttkTimer(Thread):
         return self.iters
 
 
-# def doit():
-#    print("hey dude")
-
-# code to demo ttkTimer
-# t = ttkTimer(doit, 1.0)
-# t.start()
-# time.sleep(5)
-# print("t.get= ", t.get())
-# t.stop()
-# print("timer should be stopped now")
 
 
 class Player(Tk.Frame):
@@ -168,8 +167,8 @@ FROM `personal_use`.`episode_table`;"""
         pause = ttk.Button(ctrlpanel, text="Pause", command=self.OnPause)
         play = ttk.Button(ctrlpanel, text="Play", command=self.OnPlay)
         stop = ttk.Button(ctrlpanel, text="Stop", command=self.OnStop)
-        next = ttk.Button(ctrlpanel, text="next", command=self.OnNext)
-        previous = ttk.Button(ctrlpanel, text="previous", command=self.OnPrevious)
+        next = ttk.Button(ctrlpanel, text="Next", command=self.OnNext)
+        previous = ttk.Button(ctrlpanel, text="Previous", command=self.OnPrevious)
         volume = ttk.Button(ctrlpanel, text="Volume", command=self.OnSetVolume)
         pause.pack(side=Tk.LEFT)
         play.pack(side=Tk.LEFT)
@@ -197,11 +196,7 @@ FROM `personal_use`.`episode_table`;"""
         self.player = self.Instance.media_player_new()
 
 
-        # below is a test, now use the File->Open file menu
-        # media = self.Instance.media_new('output.mp4')
-        # self.player.set_media(media)
-        # self.player.play() # hit the player button
-        # self.player.video_set_deinterlace(str_to_bytes('yadif'))
+
 
         self.timer = ttkTimer(self.OnTimer, 1.0)
         self.timer.start()
@@ -211,17 +206,16 @@ FROM `personal_use`.`episode_table`;"""
 
         self.parent.update()
 
-        # self.player.set_hwnd(self.GetHandle()) # for windows, OnOpen does does this
 
 
-    ##tony
+
 
 
     def printSomething(self,txt):
         # if you want the button to disappear:
         # button.destroy() or button.pack_forget()
         # 0 is unnecessary
-            #global label_arr
+
             if len(self.label_arr)>0:
                 self.label_arr[-1].destroy()
             label = Tk.Label(root, text=txt)
@@ -267,7 +261,7 @@ FROM `personal_use`.`episode_table`;"""
 
 
 
-    ##tony
+
     def OnPrevious(self):
 
         if self.episode_num>0:
@@ -377,13 +371,13 @@ FROM `personal_use`.`episode_table`;"""
             # self.volslider.SetValue(self.player.audio_get_volume() / 2)
         self.volslider.set(self.player.audio_get_volume())
 
-    ##tony
+
     def Create(self,dirname,filename):
 
 
         if self.first_entrence==0:##if first time then start from the time you stopped
             self.Media = self.Instance.media_new(str(os.path.join(dirname, filename)))
-            print(str(self.episode_time))
+
             self.Media.add_option('start-time='+str(self.episode_time)+'')
             self.player.set_media(self.Media)
             self.first_entrence+=1
@@ -398,8 +392,6 @@ FROM `personal_use`.`episode_table`;"""
         self.video_len = VideoFileClip(str(os.path.join(dirname, filename)))
         self.video_len = self.video_len.duration
         self.running=1
-        #self.player.set_time(15)
-        #print(filename)
         self.printSomething(filename)
 
     def OnPlay(self):
@@ -410,6 +402,7 @@ FROM `personal_use`.`episode_table`;"""
         # Tk.FileDialog to select a file
         if not self.player.get_media():
             self.OnOpen()
+
         else:
             # Try to launch the media, if this fails display an error message
             if self.player.play() == -1:
@@ -435,7 +428,7 @@ FROM `personal_use`.`episode_table`;"""
     def OnTimer(self):
         """Update the time slider according to the current movie time.
         """
-        #global running,episode_time
+       
         if self.player == None:
             return
         # since the self.player.get_length can change while playing,
@@ -454,6 +447,9 @@ FROM `personal_use`.`episode_table`;"""
         if self.first_entrence!=0:##important for starting from saved time
             self.episode_time=dbl
         self.timeslider_last_val = ("%.0f" % dbl) + ".0"
+
+
+
         # don't want to programatically change slider while user is messing with it.
         # wait 2 seconds after user lets go of slider
         if time.time() > (self.timeslider_last_update + 2.0):
