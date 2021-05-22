@@ -73,7 +73,7 @@ else:
 
 # import standard libraries
 import os
-#import pathlib
+import pathlib
 from threading import Thread, Event
 import time
 import keyboard
@@ -125,15 +125,18 @@ class Player(Tk.Frame):
         self.Player = Instance('--loop')
         self.parent = parent
 
-        q1="""SELECT `episode_table`.`episode_num`,
-    `episode_table`.`episode_time`,
-    `episode_table`.`episode_season`
-FROM `personal_use`.`episode_table`;"""
-        results = read_query(connection, q1)
 
-        self.episode_num=results[0][0]-1  ##subracting 1 to match array position of real episode
-        self.episode_season=results[0][2]
-        self.episode_time=results[0][1]
+     #before new update
+
+ #       q1="""SELECT `episode_table`.`episode_num`,
+ #   `episode_table`.`episode_time`,
+ #   `episode_table`.`episode_season`
+#FROM `personal_use`.`episode_table`;"""
+#        results = read_query(connection, q1)
+
+ #       self.episode_num=results[0][0]-1  ##subracting 1 to match array position of real episode
+ #       self.episode_season=results[0][2]
+ #       self.episode_time=results[0][1]
 
         self.first_entrence=0
         self.label_arr=[]
@@ -229,34 +232,54 @@ FROM `personal_use`.`episode_table`;"""
 
     def OnNext(self):
 
-        if self.episode_num<len(self.videos)-1:
+        if self.episode_num<len(self.videos)-1:##in season
             self.episode_num += 1
-            q1="""TRUNCATE `personal_use`.`episode_table`;"""
+        #    q1="""TRUNCATE `personal_use`.`episode_table`;"""
+        #    execute_query(connection, q1)
+        #    q1="""INSERT INTO `personal_use`.`episode_table`
+        #            (`episode_num`,
+        #            `episode_time`,
+        #            `episode_season`)
+        #                VALUES
+        #                ("""+str(self.episode_num+1)+""","""+str(self.episode_time)+""","""+str(self.episode_season)+""");"""
+        #    execute_query(connection,q1)
+            q1="""UPDATE `personal_use`.`episode_table`
+                SET
+                `episode_num`= """+str(self.episode_num+1)+""",
+                `episode_time` = """+str(self.episode_time)+""",
+                `episode_season`="""+str(self.episode_season)+"""
+                WHERE  `show_name`='"""+str(self.show_name)+"""';
+                """
             execute_query(connection, q1)
-            q1="""INSERT INTO `personal_use`.`episode_table`
-                    (`episode_num`,
-                    `episode_time`,
-                    `episode_season`)
-                        VALUES
-                        ("""+str(self.episode_num+1)+""","""+str(self.episode_time)+""","""+str(self.episode_season)+""");"""
-            execute_query(connection,q1)
 
             self.Create(self.dirname,self.videos[self.episode_num])
             self.OnPlay()
-        else:
+        else:##start new season
             self.episode_season+=1
             self.episode_num=1
-            q1 = """TRUNCATE `personal_use`.`episode_table`;"""
+            #q1 = """TRUNCATE `personal_use`.`episode_table`;"""
+            #execute_query(connection, q1)
+            #q1 = """INSERT INTO `personal_use`.`episode_table`
+            #                    (`episode_num`,
+            #                    `episode_time`,
+            #                    `episode_season`)
+            #                        VALUES
+            #                        (""" + str(self.episode_num) + """,""" + str(self.episode_time) + """,""" + str(
+            #    self.episode_season) + """);"""
+            #execute_query(connection, q1)
+
+            q1 = """UPDATE `personal_use`.`episode_table`
+                           SET
+                           `episode_num`= """ + str(self.episode_num) + """,
+                           `episode_time` = """ + str(self.episode_time) + """,
+                           `episode_season`=""" + str(self.episode_season) + """
+                           WHERE  `show_name`='""" + str(self.show_name) + """';
+                           """
             execute_query(connection, q1)
-            q1 = """INSERT INTO `personal_use`.`episode_table`
-                                (`episode_num`,
-                                `episode_time`,
-                                `episode_season`)
-                                    VALUES
-                                    (""" + str(self.episode_num) + """,""" + str(self.episode_time) + """,""" + str(
-                self.episode_season) + """);"""
-            execute_query(connection, q1)
-            self.episode_num-=1
+
+
+
+            self.episode_num-=1##so it will match the array
             self.OnOpen()
 
 
@@ -264,42 +287,72 @@ FROM `personal_use`.`episode_table`;"""
 
     def OnPrevious(self):
 
-        if self.episode_num>0:
+        if self.episode_num>0:##in season
             self.episode_num -= 1
-            q1 = """TRUNCATE `personal_use`.`episode_table`;"""
+            #q1 = """TRUNCATE `personal_use`.`episode_table`;"""
+            #execute_query(connection, q1)
+            #q1 = """INSERT INTO `personal_use`.`episode_table`
+            #                    (`episode_num`,
+            #                    `episode_time`,
+            #                    `episode_season`)
+            #                        VALUES
+            #                        (""" + str(self.episode_num+1) + """,""" + str(self.episode_time) + """,""" + str(
+            #    self.episode_season) + """);"""
+            #execute_query(connection, q1)
+
+            q1 = """UPDATE `personal_use`.`episode_table`
+                                       SET
+                                       `episode_num`= """ + str(self.episode_num+1)+ """,
+                                       `episode_time` = """ + str(self.episode_time) + """,
+                                       `episode_season`=""" + str(self.episode_season) + """
+                                       WHERE  `show_name`='""" + str(self.show_name) + """';
+                                       """
             execute_query(connection, q1)
-            q1 = """INSERT INTO `personal_use`.`episode_table`
-                                (`episode_num`,
-                                `episode_time`,
-                                `episode_season`)
-                                    VALUES
-                                    (""" + str(self.episode_num+1) + """,""" + str(self.episode_time) + """,""" + str(
-                self.episode_season) + """);"""
-            execute_query(connection, q1)
+
             self.Create(self.dirname, self.videos[self.episode_num])
             self.OnPlay()
-        else:
+        else:##back to previous season
             self.episode_season -= 1
 
-            self.dirname = r"C:\Users\tonyh\OneDrive\Desktop\shows and movies\shows\that 70s show\season"
+            #self.dirname = r"C:\Users\tonyh\OneDrive\Desktop\shows and movies\shows\that 70s show\season"
+            #self.dirname += str(self.episode_season)
+
+            self.dirname = r"C:\Users\tonyh\OneDrive\Desktop\shows and movies\shows"
+            self.dirname += "\\"
+            self.dirname += self.show_name
+            self.dirname += "\\"
+            self.dirname += "season"
             self.dirname += str(self.episode_season)
 
             self.mediaList = self.Player.media_list_new()
             self.videos = os.listdir(self.dirname)
 
             self.episode_num = len(self.videos)
-            q1 = """TRUNCATE `personal_use`.`episode_table`;"""
+
+
+            #q1 = """TRUNCATE `personal_use`.`episode_table`;"""
+            #execute_query(connection, q1)
+            #q1 = """INSERT INTO `personal_use`.`episode_table`
+            #                                (`episode_num`,
+            #                                `episode_time`,
+            #                                `episode_season`)
+            #                                    VALUES
+            #                                    (""" + str(self.episode_num) + """,""" + str(
+            #    self.episode_time) + """,""" + str(
+            #    self.episode_season) + """);"""
+            #execute_query(connection, q1)
+
+            q1 = """UPDATE `personal_use`.`episode_table`
+                                                   SET
+                                                   `episode_num`= """ + str(self.episode_num) + """,
+                                                   `episode_time` = """ + str(self.episode_time) + """,
+                                                   `episode_season`=""" + str(self.episode_season) + """
+                                                   WHERE  `show_name`='""" + str(self.show_name) + """';
+                                                   """
             execute_query(connection, q1)
-            q1 = """INSERT INTO `personal_use`.`episode_table`
-                                            (`episode_num`,
-                                            `episode_time`,
-                                            `episode_season`)
-                                                VALUES
-                                                (""" + str(self.episode_num) + """,""" + str(
-                self.episode_time) + """,""" + str(
-                self.episode_season) + """);"""
-            execute_query(connection, q1)
-            self.episode_num -= 1
+
+
+            self.episode_num -= 1##so it will match the array
             self.OnOpen()
 
     def OnExit(self, evt):
@@ -316,21 +369,58 @@ FROM `personal_use`.`episode_table`;"""
         # Create a file dialog opened in the current home directory, where
         # you can display all kind of files, having as title "Choose a file".
         #p = pathlib.Path(os.path.expanduser("~"))
-        #fullname = askopenfilename(initialdir=p, title="choose your file",
-                                   #filetypes=(("all files", "*.*"), ("mp4 files", "*.mp4")))
+        p = pathlib.Path(os.path.expanduser(r"C:\Users\tonyh\OneDrive\Desktop\shows and movies\shows\show names"))
+        fullname = askopenfilename(initialdir=p, title="choose your file",
+                                   filetypes=(("all files", "*.*"), ("mp4 files", "*.mp4")))
         #if os.path.isfile(fullname):
-            #print(fullname)
-            #splt = os.path.split(fullname)
-        #global dirname,videos
+        #    print(fullname)
+        #    splt = os.path.split(fullname)
+
         #dirname = os.path.dirname(fullname)
+
+        #new addition
+        filename = os.path.basename(fullname)
+        filename=filename[:-4]##deletes the .txt from the name
+
+        print(filename)
         #self.dirname=r"C:\Users\tonyh\OneDrive\Desktop\shows and movies\shows\that 70s show\season1"
 
-        self.dirname=r"C:\Users\tonyh\OneDrive\Desktop\shows and movies\shows\that 70s show\season"
-        self.dirname+=str(self.episode_season)
-            #filename = os.path.basename(fullname)
+
+
+        ##defining the properties of the show:
+
+        q1 = """SELECT `episode_table`.`episode_num`,
+            `episode_table`.`episode_time`,
+            `episode_table`.`episode_season`
+    
+            FROM `personal_use`.`episode_table`
+
+            WHERE `episode_table`.`show_name`='"""+filename+"""'"""
+        results = read_query(connection, q1)
+        self.episode_num = results[0][0] - 1  ##subracting 1 to match array position of real episode
+        self.episode_season = results[0][2]
+        self.episode_time = results[0][1]
+        self.show_name=filename
+
+        ##new addition
+        self.dirname = r"C:\Users\tonyh\OneDrive\Desktop\shows and movies\shows"
+        self.dirname+="\\"
+        self.dirname+=filename
+        self.dirname += "\\"
+        self.dirname+="season"
+        self.dirname += str(self.episode_season)
+
+
+
+        ##before updating
+
+        #self.dirname=r"C:\Users\tonyh\OneDrive\Desktop\shows and movies\shows\that 70s show\season"
+        #self.dirname+=str(self.episode_season)
+
 
 
             ##tony
+        ##creating the array of episodes
         self.mediaList = self.Player.media_list_new()
         self.videos = os.listdir(self.dirname)
 
@@ -428,7 +518,7 @@ FROM `personal_use`.`episode_table`;"""
     def OnTimer(self):
         """Update the time slider according to the current movie time.
         """
-       
+
         if self.player == None:
             return
         # since the self.player.get_length can change while playing,
@@ -528,7 +618,11 @@ FROM `personal_use`.`episode_table`;"""
 
 
     def _quit(self):
-        q1 = """UPDATE `personal_use`.`episode_table` SET `episode_time` = '"""+str(self.episode_time)+"""';"""
+        q1 = """UPDATE `personal_use`.`episode_table` SET `episode_num` = """+str(self.episode_num+1)+""",`episode_time` = '"""+str(self.episode_time)+"""',`episode_season` ='"""+str(self.episode_season)+"""'   WHERE
+        `show_name` = '"""+str(self.show_name)+"""';"""
+
+
+
         execute_query(connection,q1);
         print("_quit: bye")
         root = Tk_get_root()
