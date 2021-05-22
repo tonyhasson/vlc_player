@@ -15,5 +15,9 @@ some of the features:
 *current season,episode and time in episode will be saved in a database,and will start automaticly when the app is opened again.
 
 
+Version Update-
+
+*added ability to choose different tv shows.
+
 
 https://user-images.githubusercontent.com/63504193/110381452-215faa00-8062-11eb-813c-c7a89ff36b7d.mp4
